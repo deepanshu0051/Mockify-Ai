@@ -38,14 +38,11 @@ export default function AnswersPage() {
   if (isLoading) return null;
 
   return (
-    <PageWrapper className="max-w-4xl mx-auto px-4 py-20 w-full">
+    <PageWrapper className="max-w-4xl mx-auto px-4 py-20 w-full relative">
       <div className="space-y-8 sm:space-y-12">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
           <div className="space-y-2">
-            <button onClick={() => router.push('/result')} className="flex items-center gap-2 text-slate-400 hover:text-slate-600 font-medium text-xs sm:text-sm mb-1 sm:mb-2 transition-colors">
-              <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4" /> Back to Results
-            </button>
-            <h1 className="text-2xl sm:text-4xl font-bold text-slate-800 tracking-tight">Review Answers</h1>
+            <h1 className="text-2xl sm:text-4xl font-bold text-slate-800 tracking-tight mt-6 sm:mt-0">Review Answers</h1>
             <p className="text-sm sm:text-base text-slate-500">Compare your responses with our model technical answers.</p>
           </div>
           <Button variant="secondary" className="rounded-xl sm:rounded-2xl gap-2 font-bold h-10 sm:h-auto w-full md:w-auto" onClick={() => router.push('/difficulty')}>

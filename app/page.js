@@ -52,9 +52,6 @@ export default function LandingPage() {
               Get Started <ArrowRight className="w-4 h-4 lg:w-5 lg:h-5 transition-transform group-hover:translate-x-1" />
             </Button>
           </Link>
-          <Button variant="outline" size="lg" className="h-12 lg:h-16 px-6 lg:px-10 w-full sm:w-auto text-sm lg:text-lg">
-            View Sample Interview
-          </Button>
         </motion.div>
 
         {/* Stats/Features */}

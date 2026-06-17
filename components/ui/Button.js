@@ -12,6 +12,7 @@ const variants = {
   outline: 'bg-white/50 backdrop-blur-[10px] text-[#4f46e5] border border-white/80 shadow-[0_2px_10px_rgba(0,0,0,0.05)] hover:bg-white/60 hover:shadow-[0_4px_15px_rgba(0,0,0,0.08)]',
   ghost: 'hover:bg-white/40 text-[#4f46e5] backdrop-blur-[5px]',
   danger: 'bg-red-500/80 backdrop-blur-[10px] text-white hover:bg-red-600 shadow-lg shadow-red-500/20',
+  success: 'bg-gradient-to-br from-[#10b981] to-[#059669] text-white shadow-[0_4px_15px_rgba(16,185,129,0.3)] border-none hover:shadow-[0_6px_20px_rgba(16,185,129,0.4)]',
 };
 
 const sizes = {

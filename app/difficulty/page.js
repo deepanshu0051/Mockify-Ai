@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Zap, Shield, Flame, Shuffle, CheckCircle2, Home } from 'lucide-react';
+import { Zap, Shield, Flame, Shuffle, CheckCircle2 } from 'lucide-react';
 import PageWrapper from '@/components/PageWrapper';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
@@ -60,11 +60,6 @@ export default function DifficultyPage() {
     }
   };
 
-  const goHome = () => {
-    localStorage.clear();
-    router.push('/');
-  };
-
   const badgeColors = {
     easy: 'green',
     medium: 'amber',
@@ -74,16 +69,6 @@ export default function DifficultyPage() {
 
   return (
     <PageWrapper className="max-w-4xl mx-auto px-4 py-20 w-full relative">
-      {/* Home Button */}
-      <div className="absolute top-4 right-4 sm:top-8 sm:right-8 z-10">
-        <button 
-          onClick={goHome}
-          className="w-10 h-10 rounded-full bg-white/70 backdrop-blur-md border border-white/90 shadow-lg flex items-center justify-center text-indigo-600 hover:scale-110 hover:bg-white transition-all focus:outline-none"
-          title="Go Home & Reset"
-        >
-          <Home className="w-5 h-5" />
-        </button>
-      </div>
 
       <div className="space-y-8 sm:space-y-12">
         <div className="text-center space-y-2 sm:space-y-3">

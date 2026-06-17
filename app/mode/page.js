@@ -99,10 +99,6 @@ export default function ModePage() {
           >
             Start Interview <Play className="w-6 h-6 fill-current group-hover:scale-110 transition-transform" />
           </Button>
-          
-          <button onClick={() => router.back()} className="flex items-center gap-2 text-slate-400 hover:text-slate-600 font-medium transition-colors">
-            <ArrowLeft className="w-4 h-4" /> Change Difficulty
-          </button>
         </div>
       </div>
     </PageWrapper>
