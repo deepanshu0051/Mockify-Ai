@@ -93,16 +93,7 @@ export default function InterviewPage() {
     }
   };
 
-  if (isLoading) return null;
-
-  if (mode === 'voice') {
-    return <NovaVoiceExperience questions={questions} />;
-  }
-
-  const currentQuestion = questions[currentIndex];
-  const progress = ((currentIndex + 1) / 10) * 100;
-  const isLast = currentIndex === 9;
-  
+  // ── All hooks MUST be called before any early return (Rules of Hooks) ──
   const canGoNext = useMemo(() => {
     const currentAnswer = answers[currentIndex] || '';
     const wordCount = currentAnswer.trim().split(/\s+/).filter(Boolean).length;
@@ -113,6 +104,17 @@ export default function InterviewPage() {
     const currentAnswer = answers[currentIndex] || '';
     return currentAnswer.trim().split(/\s+/).filter(Boolean).length;
   }, [answers, currentIndex]);
+
+  if (isLoading) return null;
+
+  if (mode === 'voice') {
+    return <NovaVoiceExperience questions={questions} />;
+  }
+
+  const currentQuestion = questions[currentIndex];
+  const progress = ((currentIndex + 1) / 10) * 100;
+  const isLast = currentIndex === 9;
+  
 
   return (
     <PageWrapper className="max-w-4xl mx-auto px-4 py-12 w-full h-full flex flex-col relative">

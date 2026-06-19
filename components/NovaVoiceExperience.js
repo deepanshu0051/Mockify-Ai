@@ -23,10 +23,11 @@ export default function NovaVoiceExperience({ questions }) {
   const router = useRouter();
   
   // ── States ─────────────────────────────────────────────────────────────
-  const [flowState, setFlowState] = useState('support_check'); // support_check -> greeting -> language -> rules -> interview -> complete
-  const [novaState, setNovaState] = useState('idle'); // idle | speaking | listening | thinking
-  const [lang, setLang] = useState('en-US'); // 'en-US' or 'hi-IN'
+  const [flowState, setFlowState] = useState('support_check');
+  const [novaState, setNovaState] = useState('idle');
+  const [lang, setLang] = useState('en-US');
   const [isSupported, setIsSupported] = useState(true);
+  const [ttsUnlocked, setTtsUnlocked] = useState(false); // Mobile: requires user gesture
   
   const [showRules, setShowRules] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
@@ -39,14 +40,14 @@ export default function NovaVoiceExperience({ questions }) {
   const [difficulty, setDifficulty] = useState('medium');
   const [answers, setAnswers] = useState(Array(10).fill(''));
   
-  // Refs to manage Speech APIs cleanly without stale closures
+  // Refs
   const recognitionRef = useRef(null);
   const synthRef = useRef(null);
   const currentTranscriptRef = useRef('');
+  const voicesRef = useRef([]); // Pre-loaded voice list for mobile
 
   // ── Initialization ─────────────────────────────────────────────────────
   useEffect(() => {
-    // Check Speech API Support
     const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!window.speechSynthesis || !SpeechRec) {
       setIsSupported(false);
@@ -54,20 +55,49 @@ export default function NovaVoiceExperience({ questions }) {
     }
     
     synthRef.current = window.speechSynthesis;
+
+    // Load voices — on mobile they load async via onvoiceschanged
+    const loadVoices = () => {
+      const v = window.speechSynthesis.getVoices();
+      if (v.length > 0) voicesRef.current = v;
+    };
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
     
     const candidateName = getItem('mockify_candidate_name', 'there');
     const diff = getItem('mockify_difficulty', 'medium');
     setUserName(candidateName);
     setDifficulty(diff);
     
-    setFlowState('greeting');
+    // Do NOT auto-start greeting — wait for user tap (mobile TTS unlock)
+    // setFlowState('greeting') is called from handleTtsUnlock instead
     
     return () => {
-      // Cleanup on unmount
       if (synthRef.current) synthRef.current.cancel();
+      if (window.speechSynthesis) window.speechSynthesis.onvoiceschanged = null;
       stopListening();
     };
   }, []);
+
+  // ── Mobile TTS Unlock (required before any speak() on mobile) ──────────
+  const handleTtsUnlock = () => {
+    if (ttsUnlocked || !synthRef.current) return;
+    // Fire a silent utterance to unlock the audio context with user gesture
+    const silent = new SpeechSynthesisUtterance(' ');
+    silent.volume = 0;
+    silent.rate = 10;
+    silent.onend = () => {
+      setTtsUnlocked(true);
+      setFlowState('greeting'); // Now safe to speak
+    };
+    silent.onerror = () => {
+      // Even on error, try to proceed — some browsers fire error for silent
+      setTtsUnlocked(true);
+      setFlowState('greeting');
+    };
+    synthRef.current.speak(silent);
+  };
+
 
   // ── Flow Engine ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -86,7 +116,11 @@ export default function NovaVoiceExperience({ questions }) {
     
     const targetLang = language || lang;
     const targetLangMatch = targetLang === 'hi-IN' ? 'hi' : 'en';
-    const voices = synthRef.current.getVoices();
+
+    // Use pre-loaded voicesRef (avoids empty list on mobile)
+    const voices = voicesRef.current.length > 0
+      ? voicesRef.current
+      : window.speechSynthesis.getVoices();
     let bestVoice = voices.find(v => v.lang.startsWith(targetLangMatch) && v.name.includes('Google'));
     if (!bestVoice) bestVoice = voices.find(v => v.lang.startsWith(targetLangMatch));
     
@@ -107,6 +141,8 @@ export default function NovaVoiceExperience({ questions }) {
       if (onComplete) onComplete();
     };
     
+    // Mobile Chrome workaround: resume synthesis if it was interrupted
+    if (synthRef.current.paused) synthRef.current.resume();
     synthRef.current.speak(utterance);
   };
 
@@ -432,6 +468,35 @@ export default function NovaVoiceExperience({ questions }) {
           </Button>
         </Card>
       </PageWrapper>
+    );
+  }
+
+  // ── Mobile TTS Gate: show Tap-to-Begin overlay until audio context is unlocked
+  if (!ttsUnlocked) {
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-br from-white via-indigo-50/30 to-pink-50/40 px-6">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          className="flex flex-col items-center gap-8 text-center max-w-sm"
+        >
+          <SiriOrb state="idle" />
+          <div className="space-y-2">
+            <h2 className="text-2xl font-black text-slate-800">Nova AI is Ready</h2>
+            <p className="text-slate-500 text-sm leading-relaxed">
+              Tap the button below to start. Your browser requires a tap to enable voice.
+            </p>
+          </div>
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.03 }}
+            onClick={handleTtsUnlock}
+            className="w-full max-w-xs h-16 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold text-lg shadow-xl shadow-indigo-200 active:scale-95 transition-all"
+          >
+            Tap to Begin 🎙️
+          </motion.button>
+        </motion.div>
+      </div>
     );
   }
 
